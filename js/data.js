@@ -6,7 +6,7 @@
     const STORAGE_KEY = 'lightfox_manga_data';
     const SETTINGS_KEY = 'lightfox_settings';
 
-    // Образцы данных манги
+    // Образцы данных манги с рабочими видео
     const sampleData = [
         {
             id: '1',
@@ -17,15 +17,18 @@
             rating: 9.0,
             genres: ['Экшен', 'Драма', 'Фэнтези', 'Военное'],
             categories: ['Сёнен'],
-            availableEpisodes: 87,
+            availableEpisodes: 3,
             totalEpisodes: 87,
+            availableChapters: 5,
+            totalChapters: 139,
             currentDonations: 7500,
             donationGoal: 10000,
             image: 'https://via.placeholder.com/300x450/FF6B35/FFFFFF?text=Атака+титанов',
             description: 'Человечество живёт в городах, окружённых огромными стенами, защищающими от титанов — гигантских гуманоидов, пожирающих людей.',
             episodes: {
-                1: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
-                2: 'https://www.youtube.com/embed/dQw4w9WgXcQ'
+                '1': 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+                '2': 'https://www.youtube.com/embed/oHg5SJYRHA0',
+                '3': 'https://www.youtube.com/embed/9bZkp7q19f0'
             }
         },
         {
@@ -37,14 +40,17 @@
             rating: 8.7,
             genres: ['Экшен', 'Приключения', 'Боевые искусства'],
             categories: ['Сёнен'],
-            availableEpisodes: 720,
+            availableEpisodes: 2,
             totalEpisodes: 720,
+            availableChapters: 10,
+            totalChapters: 700,
             currentDonations: 12000,
             donationGoal: 15000,
             image: 'https://via.placeholder.com/300x450/FF6B35/FFFFFF?text=Наруто',
             description: 'История молодого ниндзя Наруто Узумаки, мечтающего стать Хокаге.',
             episodes: {
-                1: 'https://www.youtube.com/embed/dQw4w9WgXcQ'
+                '1': 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+                '2': 'https://www.youtube.com/embed/oHg5SJYRHA0'
             }
         },
         {
@@ -56,14 +62,19 @@
             rating: 9.1,
             genres: ['Экшен', 'Приключения', 'Комедия'],
             categories: ['Сёнен'],
-            availableEpisodes: 1000,
+            availableEpisodes: 4,
             totalEpisodes: 1200,
+            availableChapters: 20,
+            totalChapters: 1100,
             currentDonations: 8000,
             donationGoal: 20000,
             image: 'https://via.placeholder.com/300x450/FF6B35/FFFFFF?text=Ван+Пис',
             description: 'Приключения Монки Д. Луффи и его команды пиратов в поисках легендарного сокровища.',
             episodes: {
-                1: 'https://www.youtube.com/embed/dQw4w9WgXcQ'
+                '1': 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+                '2': 'https://www.youtube.com/embed/oHg5SJYRHA0',
+                '3': 'https://www.youtube.com/embed/9bZkp7q19f0',
+                '4': 'https://www.youtube.com/embed/astISOttCQ0'
             }
         },
         {
@@ -75,14 +86,18 @@
             rating: 8.5,
             genres: ['Экшен', 'Школа', 'Супергерои'],
             categories: ['Сёнен'],
-            availableEpisodes: 138,
+            availableEpisodes: 3,
             totalEpisodes: 150,
+            availableChapters: 15,
+            totalChapters: 400,
             currentDonations: 5500,
             donationGoal: 12000,
             image: 'https://via.placeholder.com/300x450/FF6B35/FFFFFF?text=Моя+геройская+академия',
             description: 'В мире, где 80% населения обладает суперспособностями, обычный мальчик мечтает стать героем.',
             episodes: {
-                1: 'https://www.youtube.com/embed/dQw4w9WgXcQ'
+                '1': 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+                '2': 'https://www.youtube.com/embed/oHg5SJYRHA0',
+                '3': 'https://www.youtube.com/embed/9bZkp7q19f0'
             }
         },
         {
@@ -94,14 +109,17 @@
             rating: 8.8,
             genres: ['Экшен', 'Сверхъестественное', 'Школа'],
             categories: ['Сёнен'],
-            availableEpisodes: 24,
+            availableEpisodes: 2,
             totalEpisodes: 50,
+            availableChapters: 8,
+            totalChapters: 250,
             currentDonations: 3000,
             donationGoal: 8000,
             image: 'https://via.placeholder.com/300x450/FF6B35/FFFFFF?text=Магическая+битва',
             description: 'Юки Итадори попадает в мир магов и проклятий после того, как съедает палец древнего демона.',
             episodes: {
-                1: 'https://www.youtube.com/embed/dQw4w9WgXcQ'
+                '1': 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+                '2': 'https://www.youtube.com/embed/oHg5SJYRHA0'
             }
         },
         {
@@ -113,14 +131,20 @@
             rating: 8.9,
             genres: ['Экшен', 'Исторический', 'Сверхъестественное'],
             categories: ['Сёнен'],
-            availableEpisodes: 32,
+            availableEpisodes: 5,
             totalEpisodes: 44,
+            availableChapters: 25,
+            totalChapters: 205,
             currentDonations: 9200,
             donationGoal: 11000,
             image: 'https://via.placeholder.com/300x450/FF6B35/FFFFFF?text=Демон+разрушения',
             description: 'Танджиро Камадо становится охотником на демонов, чтобы спасти свою сестру.',
             episodes: {
-                1: 'https://www.youtube.com/embed/dQw4w9WgXcQ'
+                '1': 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+                '2': 'https://www.youtube.com/embed/oHg5SJYRHA0',
+                '3': 'https://www.youtube.com/embed/9bZkp7q19f0',
+                '4': 'https://www.youtube.com/embed/astISOttCQ0',
+                '5': 'https://www.youtube.com/embed/L_jWHffIx5E'
             }
         },
         {
@@ -132,8 +156,10 @@
             rating: 9.2,
             genres: ['Экшен', 'Драма', 'Ужасы', 'Фэнтези'],
             categories: ['Сэйнэн'],
-            availableEpisodes: 364,
-            totalEpisodes: 400,
+            availableEpisodes: 0,
+            totalEpisodes: 0,
+            availableChapters: 364,
+            totalChapters: 400,
             currentDonations: 15000,
             donationGoal: 25000,
             image: 'https://via.placeholder.com/300x450/FF6B35/FFFFFF?text=Берсерк',
@@ -149,14 +175,18 @@
             rating: 8.3,
             genres: ['Экшен', 'Ужасы', 'Сверхъестественное'],
             categories: ['Сэйнэн'],
-            availableEpisodes: 48,
+            availableEpisodes: 3,
             totalEpisodes: 48,
+            availableChapters: 12,
+            totalChapters: 144,
             currentDonations: 6800,
             donationGoal: 9000,
             image: 'https://via.placeholder.com/300x450/FF6B35/FFFFFF?text=Токийский+гуль',
             description: 'Кен Канеки становится получеловеком-полугулем после встречи с загадочной девушкой.',
             episodes: {
-                1: 'https://www.youtube.com/embed/dQw4w9WgXcQ'
+                '1': 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+                '2': 'https://www.youtube.com/embed/oHg5SJYRHA0',
+                '3': 'https://www.youtube.com/embed/9bZkp7q19f0'
             }
         }
     ];
@@ -166,6 +196,7 @@
         constructor() {
             this.data = this.loadData();
             this.settings = this.loadSettings();
+            console.log('🦊 MangaDataSystem инициализирована');
         }
 
         // Загрузка данных из localStorage
@@ -176,14 +207,16 @@
                     const parsedData = JSON.parse(stored);
                     // Проверяем, что данные валидны
                     if (Array.isArray(parsedData) && parsedData.length > 0) {
+                        console.log(`📚 Загружено ${parsedData.length} тайтлов из localStorage`);
                         return parsedData;
                     }
                 }
             } catch (error) {
-                console.warn('Ошибка загрузки данных из localStorage:', error);
+                console.warn('⚠️ Ошибка загрузки данных из localStorage:', error);
             }
             
             // Если нет сохранённых данных, используем образцы
+            console.log('📦 Используем образцы данных');
             this.saveData(sampleData);
             return [...sampleData];
         }
@@ -200,8 +233,9 @@
                         detail: { data: dataToSave }
                     }));
                 }
+                console.log('💾 Данные сохранены');
             } catch (error) {
-                console.error('Ошибка сохранения данных:', error);
+                console.error('❌ Ошибка сохранения данных:', error);
             }
         }
 
@@ -211,7 +245,7 @@
                 const stored = localStorage.getItem(SETTINGS_KEY);
                 return stored ? JSON.parse(stored) : {};
             } catch (error) {
-                console.warn('Ошибка загрузки настроек:', error);
+                console.warn('⚠️ Ошибка загрузки настроек:', error);
                 return {};
             }
         }
@@ -221,7 +255,7 @@
             try {
                 localStorage.setItem(SETTINGS_KEY, JSON.stringify(this.settings));
             } catch (error) {
-                console.error('Ошибка сохранения настроек:', error);
+                console.error('❌ Ошибка сохранения настроек:', error);
             }
         }
 
@@ -232,7 +266,13 @@
 
         // Получение манги по ID
         getMangaById(id) {
-            return this.data.find(manga => manga.id === String(id));
+            const manga = this.data.find(manga => manga.id === String(id));
+            if (manga) {
+                console.log(`📖 Найдена манга: ${manga.title}`);
+            } else {
+                console.warn(`⚠️ Манга с ID ${id} не найдена`);
+            }
+            return manga;
         }
 
         // Добавление новой манги
@@ -241,12 +281,19 @@
                 id: String(Date.now()),
                 currentDonations: 0,
                 donationGoal: 10000,
+                availableEpisodes: 0,
+                totalEpisodes: 0,
+                availableChapters: 0,
+                totalChapters: 0,
                 episodes: {},
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
                 ...manga
             };
             
             this.data.push(newManga);
             this.saveData();
+            console.log(`➕ Добавлена новая манга: ${newManga.title}`);
             return newManga;
         }
 
@@ -254,10 +301,16 @@
         updateManga(id, updates) {
             const index = this.data.findIndex(manga => manga.id === String(id));
             if (index !== -1) {
-                this.data[index] = { ...this.data[index], ...updates };
+                this.data[index] = { 
+                    ...this.data[index], 
+                    ...updates,
+                    updatedAt: new Date().toISOString()
+                };
                 this.saveData();
+                console.log(`🔄 Обновлена манга: ${this.data[index].title}`);
                 return this.data[index];
             }
+            console.warn(`⚠️ Не удалось обновить мангу с ID ${id}`);
             return null;
         }
 
@@ -267,6 +320,7 @@
             if (index !== -1) {
                 const deleted = this.data.splice(index, 1)[0];
                 this.saveData();
+                console.log(`🗑️ Удалена манга: ${deleted.title}`);
                 return deleted;
             }
             return null;
@@ -347,7 +401,7 @@
                 const from = parseInt(filters.chaptersFrom);
                 if (!isNaN(from)) {
                     result = result.filter(manga => 
-                        manga.availableEpisodes >= from
+                        (manga.availableEpisodes || 0) >= from
                     );
                 }
             }
@@ -356,7 +410,7 @@
                 const to = parseInt(filters.chaptersTo);
                 if (!isNaN(to)) {
                     result = result.filter(manga => 
-                        manga.availableEpisodes <= to
+                        (manga.availableEpisodes || 0) <= to
                     );
                 }
             }
@@ -371,7 +425,7 @@
                         result.sort((a, b) => (b.rating || 0) - (a.rating || 0));
                         break;
                     case 'updated':
-                        result.sort((a, b) => (b.year || 0) - (a.year || 0));
+                        result.sort((a, b) => new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0));
                         break;
                     case 'popularity':
                     default:
@@ -392,7 +446,7 @@
             return {
                 totalManga: this.data.length,
                 totalEpisodes: this.data.reduce((sum, manga) => sum + (manga.availableEpisodes || 0), 0),
-                averageRating: this.data.reduce((sum, manga) => sum + (manga.rating || 0), 0) / this.data.length,
+                averageRating: this.data.reduce((sum, manga) => sum + (manga.rating || 0), 0) / (this.data.length || 1),
                 totalDonations: this.data.reduce((sum, manga) => sum + (manga.currentDonations || 0), 0)
             };
         }
@@ -401,6 +455,7 @@
         resetToSampleData() {
             this.data = [...sampleData];
             this.saveData();
+            console.log('🔄 Данные сброшены к образцам');
             return this.data;
         }
 
@@ -427,9 +482,10 @@
                     this.saveSettings();
                 }
                 
+                console.log('📥 Данные импортированы успешно');
                 return true;
             } catch (error) {
-                console.error('Ошибка импорта данных:', error);
+                console.error('❌ Ошибка импорта данных:', error);
                 return false;
             }
         }
@@ -460,7 +516,10 @@
         importData: (data) => mangaSystem.importData(data),
         
         // Прямой доступ к системе для расширенного использования
-        _system: mangaSystem
+        _system: mangaSystem,
+        
+        // Флаг готовности
+        isReady: true
     };
 
     // Уведомление о готовности данных
@@ -468,12 +527,4 @@
         if (typeof window !== 'undefined') {
             window.dispatchEvent(new CustomEvent('mangaDataReady', {
                 detail: { api: window.MangaAPI }
-            }));
-        }
-    }, 100);
-
-    console.log('🦊 Light Fox Manga Data System загружена');
-    console.log(`📚 Загружено ${mangaSystem.data.length} тайтлов`);
-    console.log('🔧 API доступен через window.MangaAPI');
-
-})();
+            }
