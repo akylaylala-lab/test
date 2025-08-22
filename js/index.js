@@ -1,418 +1,317 @@
+/**
+ * Light Fox Manga - Главная страница
+ * Логика для главной страницы: карусель, секции контента
+ */
 
-    <script>
-        // Global state
-        let isDark = localStorage.getItem('theme') === 'dark';
-        let isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-        let currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
-        let currentSlide = 0;
-        let carouselInterval;
+// Состояние карусели
+let currentSlide = 0;
+let carouselInterval;
 
-        // Sample news data
-        const newsData = [
-            {
-                id: 1,
-                title: "Новая система донатов запущена!",
-                excerpt: "Теперь вы можете поддерживать любимые тайтлы и ускорить выход новых глав. Каждый донат приближает вас к новому контенту!",
-                date: "2025-01-15",
-                tag: "Обновление"
-            },
-            {
-                id: 2,
-                title: "Добавлено 50+ новых тайтлов",
-                excerpt: "В каталог добавлены популярные манхва и маньхуа. Откройте для себя новые захватывающие истории!",
-                date: "2025-01-14",
-                tag: "Каталог"
-            },
-            {
-                id: 3,
-                title: "Улучшена система уведомлений",
-                excerpt: "Теперь вы будете получать уведомления о новых главах ваших любимых тайтлов быстрее и надежнее.",
-                date: "2025-01-13",
-                tag: "Функции"
-            }
-        ];
+// Образцы новостей
+const newsData = [
+    {
+        id: 1,
+        title: "Новая система донатов запущена!",
+        excerpt: "Теперь вы можете поддерживать любимые тайтлы и ускорить выход новых глав. Каждый донат приближает вас к новому контенту!",
+        date: "2025-01-15",
+        tag: "Обновление"
+    },
+    {
+        id: 2,
+        title: "Добавлено 50+ новых тайтлов",
+        excerpt: "В каталог добавлены популярные манхва и маньхуа. Откройте для себя новые захватывающие истории!",
+        date: "2025-01-14",
+        tag: "Каталог"
+    },
+    {
+        id: 3,
+        title: "Улучшена система уведомлений",
+        excerpt: "Теперь вы будете получать уведомления о новых главах ваших любимых тайтлов быстрее и надежнее.",
+        date: "2025-01-13",
+        tag: "Функции"
+    }
+];
 
-        // Theme functionality
-        function updateTheme() {
-            document.body.setAttribute('data-theme', isDark ? 'dark' : 'light');
-            
-            // Update all theme toggle icons
-            const updateIcons = (moonClass, sunClass) => {
-                const moonIcons = document.querySelectorAll(moonClass);
-                const sunIcons = document.querySelectorAll(sunClass);
-                
-                moonIcons.forEach(icon => {
-                    icon.style.display = isDark ? 'none' : 'block';
-                });
-                
-                sunIcons.forEach(icon => {
-                    icon.style.display = isDark ? 'block' : 'none';
-                });
-            };
-            
-            updateIcons('.moon-icon', '.sun-icon');
-            updateIcons('.mobile-moon-icon', '.mobile-sun-icon');
-            
-            localStorage.setItem('theme', isDark ? 'dark' : 'light');
-        }
+/**
+ * ========================================
+ * УПРАВЛЕНИЕ КАРУСЕЛЬЮ
+ * ========================================
+ */
 
-        function toggleTheme() {
-            isDark = !isDark;
-            updateTheme();
-        }
+function createCarousel() {
+    if (!window.MangaAPI) return;
 
-        // Language functionality
-        function updateLanguage(lang) {
-            localStorage.setItem('language', lang);
-            
-            // Sync both language selectors
-            const langSwitch = document.getElementById('langSwitch');
-            const mobileLangSwitch = document.getElementById('mobileLangSwitch');
-            
-            if (langSwitch) langSwitch.value = lang;
-            if (mobileLangSwitch) mobileLangSwitch.value = lang;
-        }
+    const allManga = window.MangaAPI.getAllManga();
+    const featuredManga = allManga.slice(0, 5); // Топ 5 манги для карусели
 
-        // Authentication functionality
-        function updateAuthState() {
-            const authSection = document.getElementById('authSection');
-            const userSection = document.getElementById('userSection');
-            const logoutBtn = document.getElementById('logoutBtn');
-            
-            if (isLoggedIn && currentUser) {
-                authSection.style.display = 'none';
-                userSection.style.display = 'block';
-                logoutBtn.style.display = 'block';
-                
-                document.getElementById('userName').textContent = currentUser.name;
-                document.getElementById('userEmail').textContent = currentUser.email;
-            } else {
-                authSection.style.display = 'block';
-                userSection.style.display = 'none';
-                logoutBtn.style.display = 'none';
-            }
-        }
+    const carouselContainer = document.getElementById('heroCarousel');
+    const indicatorsContainer = document.getElementById('carouselIndicators');
 
-        function login() {
-            const name = prompt('Введите ваше имя:') || 'Пользователь';
-            const email = prompt('Введите ваш email:') || 'user@example.com';
-            
-            if (name && email) {
-                currentUser = { name, email };
-                isLoggedIn = true;
-                
-                localStorage.setItem('isLoggedIn', 'true');
-                localStorage.setItem('currentUser', JSON.stringify(currentUser));
-                
-                updateAuthState();
-                closeMenu();
-                
-                alert(`Добро пожаловать, ${name}!`);
-            }
-        }
+    if (!carouselContainer || !indicatorsContainer) return;
 
-        function logout() {
-            if (confirm('Вы уверены, что хотите выйти?')) {
-                isLoggedIn = false;
-                currentUser = null;
-                
-                localStorage.removeItem('isLoggedIn');
-                localStorage.removeItem('currentUser');
-                
-                updateAuthState();
-                closeMenu();
-                
-                alert('Вы успешно вышли из системы');
-            }
-        }
-
-        // Menu functionality
-        function toggleMenu() {
-            const sideMenu = document.getElementById('sideMenu');
-            const menuOverlay = document.getElementById('menuOverlay');
-            
-            sideMenu.classList.toggle('open');
-            menuOverlay.classList.toggle('show');
-        }
-
-        function closeMenu() {
-            const sideMenu = document.getElementById('sideMenu');
-            const menuOverlay = document.getElementById('menuOverlay');
-            
-            sideMenu.classList.remove('open');
-            menuOverlay.classList.remove('show');
-        }
-
-        // Random manga functionality
-        function openRandomManga() {
-            if (window.MangaAPI) {
-                const allManga = window.MangaAPI.getAllManga();
-                if (allManga.length > 0) {
-                    const randomManga = allManga[Math.floor(Math.random() * allManga.length)];
-                    window.location.href = `player.html?id=${randomManga.id}`;
-                } else {
-                    alert('Каталог пуст. Добавьте тайтлы через админку!');
-                }
-            } else {
-                alert('Система данных не загружена');
-            }
-        }
-
-        // Time formatting
-        function formatTime(date) {
-            const now = new Date();
-            const time = new Date(date);
-            const diff = Math.floor((now - time) / 1000);
-
-            if (diff < 60) return 'только что';
-            if (diff < 3600) return `${Math.floor(diff / 60)} мин назад`;
-            if (diff < 86400) return `${Math.floor(diff / 3600)} ч назад`;
-            if (diff < 604800) return `${Math.floor(diff / 86400)} дн назад`;
-            
-            return time.toLocaleDateString('ru-RU');
-        }
-
-        // Carousel functionality
-        function createCarousel() {
-            if (!window.MangaAPI) return;
-
-            const allManga = window.MangaAPI.getAllManga();
-            const featuredManga = allManga.slice(0, 5); // Top 5 manga for carousel
-
-            const carouselContainer = document.getElementById('heroCarousel');
-            const indicatorsContainer = document.getElementById('carouselIndicators');
-
-            // Create slides
-            carouselContainer.innerHTML = featuredManga.map((manga, index) => `
-                <div class="carousel-slide ${index === 0 ? 'active' : ''}" 
-                     style="background-image: url('${manga.image || 'https://via.placeholder.com/1200x450/FF8A50/FFFFFF?text=' + encodeURIComponent(manga.title)}')">
-                    <div class="slide-overlay"></div>
-                    <div class="slide-content">
-                        <h1 class="slide-title">${manga.title}</h1>
-                        <p class="slide-description">${manga.description || 'Захватывающая история, которая не оставит вас равнодушными.'}</p>
-                        <div class="slide-meta">
-                            <span class="slide-badge">${manga.type}</span>
-                            <span class="slide-badge">⭐ ${manga.rating}</span>
-                            <span class="slide-badge">Глав: ${manga.availableEpisodes}/${manga.totalEpisodes}</span>
-                        </div>
-                        <div class="slide-actions">
-                            <a href="player.html?id=${manga.id}" class="btn btn-primary">
-                                <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
-                                    <path d="M8 5v14l11-7z"/>
-                                </svg>
-                                Читать
-                            </a>
-                            <a href="#" class="btn btn-secondary">
-                                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
-                                </svg>
-                                В избранное
-                            </a>
-                        </div>
-                    </div>
+    // Создание слайдов
+    carouselContainer.innerHTML = featuredManga.map((manga, index) => `
+        <div class="carousel-slide ${index === 0 ? 'active' : ''}" 
+             style="background-image: url('${manga.image || 'https://via.placeholder.com/1200x450/FF8A50/FFFFFF?text=' + encodeURIComponent(manga.title)}')">
+            <div class="slide-overlay"></div>
+            <div class="slide-content">
+                <h1 class="slide-title">${manga.title}</h1>
+                <p class="slide-description">${manga.description || 'Захватывающая история, которая не оставит вас равнодушными.'}</p>
+                <div class="slide-meta">
+                    <span class="slide-badge">${manga.type}</span>
+                    <span class="slide-badge">⭐ ${manga.rating}</span>
+                    <span class="slide-badge">Глав: ${manga.availableEpisodes}/${manga.totalEpisodes}</span>
                 </div>
-            `).join('');
-
-            // Create indicators
-            indicatorsContainer.innerHTML = featuredManga.map((_, index) => `
-                <div class="indicator ${index === 0 ? 'active' : ''}" onclick="goToSlide(${index})"></div>
-            `).join('');
-
-            // Start auto-play
-            startCarousel();
-        }
-
-        function goToSlide(index) {
-            const slides = document.querySelectorAll('.carousel-slide');
-            const indicators = document.querySelectorAll('.indicator');
-
-            slides[currentSlide].classList.remove('active');
-            indicators[currentSlide].classList.remove('active');
-
-            currentSlide = index;
-
-            slides[currentSlide].classList.add('active');
-            indicators[currentSlide].classList.add('active');
-        }
-
-        function nextSlide() {
-            const totalSlides = document.querySelectorAll('.carousel-slide').length;
-            const nextIndex = (currentSlide + 1) % totalSlides;
-            goToSlide(nextIndex);
-        }
-
-        function startCarousel() {
-            carouselInterval = setInterval(nextSlide, 5000);
-        }
-
-        function stopCarousel() {
-            if (carouselInterval) {
-                clearInterval(carouselInterval);
-            }
-        }
-
-        // Render manga card
-        function renderMangaCard(manga, showBadge = '') {
-            const timeAgo = manga.updatedAt ? formatTime(manga.updatedAt) : formatTime(new Date());
-            
-            return `
-                <div class="manga-card" onclick="window.location.href='player.html?id=${manga.id}'">
-                    <div class="card-image-container">
-                        <img src="${manga.image || 'https://via.placeholder.com/300x400/FF8A50/FFFFFF?text=' + encodeURIComponent(manga.title.charAt(0))}" 
-                             alt="${manga.title}" 
-                             class="card-image"
-                             onerror="this.src='https://via.placeholder.com/300x400/FF8A50/FFFFFF?text=' + encodeURIComponent('${manga.title.charAt(0)}')">
-                        <div class="card-badges">
-                            ${manga.rating ? `<span class="badge rating">⭐ ${manga.rating}</span>` : ''}
-                            ${showBadge === 'new' ? '<span class="badge new">НОВОЕ</span>' : ''}
-                            ${showBadge === 'hot' ? '<span class="badge hot">ХИТ</span>' : ''}
-                            ${showBadge === 'updated' ? '<span class="badge updated">UPD</span>' : ''}
-                        </div>
-                    </div>
-                    <div class="card-info">
-                        <h3 class="card-title">${manga.title}</h3>
-                        <div class="card-meta">
-                            <span class="card-chapters">Глав: ${manga.availableEpisodes || 0}/${manga.totalEpisodes || 0}</span>
-                            <span class="card-type">${manga.type}</span>
-                        </div>
-                        <div class="card-time">${timeAgo}</div>
-                    </div>
+                <div class="slide-actions">
+                    <a href="player.html?id=${manga.id}" class="btn btn-primary">
+                        <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M8 5v14l11-7z"/>
+                        </svg>
+                        Читать
+                    </a>
+                    <a href="#" class="btn btn-secondary" onclick="addToFavorites('${manga.id}')">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                        </svg>
+                        В избранное
+                    </a>
                 </div>
-            `;
-        }
+            </div>
+        </div>
+    `).join('');
 
-        // Load content sections
-        function loadHotNew() {
-            if (!window.MangaAPI) return;
+    // Создание индикаторов
+    indicatorsContainer.innerHTML = featuredManga.map((_, index) => `
+        <div class="indicator ${index === 0 ? 'active' : ''}" onclick="goToSlide(${index})"></div>
+    `).join('');
 
-            const allManga = window.MangaAPI.getAllManga();
-            const hotNew = allManga
-                .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0))
-                .slice(0, 8);
+    // Запуск автопроигрывания
+    startCarousel();
+}
 
-            const grid = document.getElementById('hotNewGrid');
-            grid.innerHTML = hotNew.map(manga => renderMangaCard(manga, 'new')).join('');
-        }
+function goToSlide(index) {
+    const slides = document.querySelectorAll('.carousel-slide');
+    const indicators = document.querySelectorAll('.indicator');
 
-        function loadPopular() {
-            if (!window.MangaAPI) return;
+    if (slides.length === 0) return;
 
-            const allManga = window.MangaAPI.getAllManga();
-            const popular = allManga
-                .sort((a, b) => (b.rating || 0) - (a.rating || 0))
-                .slice(0, 8);
+    slides[currentSlide].classList.remove('active');
+    indicators[currentSlide].classList.remove('active');
 
-            const grid = document.getElementById('popularGrid');
-            grid.innerHTML = popular.map(manga => renderMangaCard(manga, 'hot')).join('');
-        }
+    currentSlide = index;
 
-        function loadNews() {
-            const grid = document.getElementById('newsGrid');
-            grid.innerHTML = newsData.map(news => `
-                <div class="news-card">
-                    <h3 class="news-title">${news.title}</h3>
-                    <p class="news-excerpt">${news.excerpt}</p>
-                    <div class="news-meta">
-                        <span class="news-tag">${news.tag}</span>
-                        <span>${formatTime(news.date)}</span>
-                    </div>
+    slides[currentSlide].classList.add('active');
+    indicators[currentSlide].classList.add('active');
+}
+
+function nextSlide() {
+    const totalSlides = document.querySelectorAll('.carousel-slide').length;
+    if (totalSlides === 0) return;
+    
+    const nextIndex = (currentSlide + 1) % totalSlides;
+    goToSlide(nextIndex);
+}
+
+function startCarousel() {
+    carouselInterval = setInterval(nextSlide, 5000);
+}
+
+function stopCarousel() {
+    if (carouselInterval) {
+        clearInterval(carouselInterval);
+    }
+}
+
+/**
+ * ========================================
+ * РЕНДЕРИНГ КАРТОЧЕК МАНГИ
+ * ========================================
+ */
+
+function renderMangaCard(manga, showBadge = '') {
+    const timeAgo = manga.updatedAt ? window.CommonUtils.formatTime(manga.updatedAt) : window.CommonUtils.formatTime(new Date());
+    
+    return `
+        <div class="manga-card" onclick="window.location.href='player.html?id=${manga.id}'">
+            <div class="card-image-container">
+                <img src="${manga.image || 'https://via.placeholder.com/300x400/FF8A50/FFFFFF?text=' + encodeURIComponent(manga.title.charAt(0))}" 
+                     alt="${manga.title}" 
+                     class="card-image"
+                     onerror="this.src='https://via.placeholder.com/300x400/FF8A50/FFFFFF?text=' + encodeURIComponent('${manga.title.charAt(0)}')">
+                <div class="card-badges">
+                    ${manga.rating ? `<span class="badge rating">⭐ ${manga.rating}</span>` : ''}
+                    ${showBadge === 'new' ? '<span class="badge new">НОВОЕ</span>' : ''}
+                    ${showBadge === 'hot' ? '<span class="badge hot">ХИТ</span>' : ''}
+                    ${showBadge === 'updated' ? '<span class="badge updated">UPD</span>' : ''}
                 </div>
-            `).join('');
-        }
-
-        function loadRecentUpdates() {
-            if (!window.MangaAPI) return;
-
-            const allManga = window.MangaAPI.getAllManga();
-            const recentUpdates = allManga
-                .sort((a, b) => new Date(b.updatedAt || b.createdAt || 0) - new Date(a.updatedAt || a.createdAt || 0))
-                .slice(0, 10);
-
-            const list = document.getElementById('updatesList');
-            list.innerHTML = recentUpdates.map(manga => `
-                <div class="update-item" onclick="window.location.href='player.html?id=${manga.id}'">
-                    <img src="${manga.image || 'https://via.placeholder.com/60x80/FF8A50/FFFFFF?text=' + encodeURIComponent(manga.title.charAt(0))}" 
-                         alt="${manga.title}" 
-                         class="update-image"
-                         onerror="this.src='https://via.placeholder.com/60x80/FF8A50/FFFFFF?text=' + encodeURIComponent('${manga.title.charAt(0)}')">
-                    <div class="update-content">
-                        <h4 class="update-title">${manga.title}</h4>
-                        <p class="update-chapter">Глава ${manga.availableEpisodes || 1} • ${manga.type}</p>
-                        <p class="update-time">${formatTime(manga.updatedAt || manga.createdAt || new Date())}</p>
-                    </div>
+            </div>
+            <div class="card-info">
+                <h3 class="card-title">${manga.title}</h3>
+                <div class="card-meta">
+                    <span class="card-chapters">Глав: ${manga.availableEpisodes || 0}/${manga.totalEpisodes || 0}</span>
+                    <span class="card-type">${manga.type}</span>
                 </div>
-            `).join('');
-        }
+                <div class="card-time">${timeAgo}</div>
+            </div>
+        </div>
+    `;
+}
 
-        // Initialize homepage
-        function initializeHomepage() {
-            createCarousel();
-            loadHotNew();
-            loadPopular();
-            loadNews();
-            loadRecentUpdates();
-        }
+/**
+ * ========================================
+ * ЗАГРУЗКА СЕКЦИЙ КОНТЕНТА
+ * ========================================
+ */
 
-        // Event listeners
-        document.addEventListener('DOMContentLoaded', function() {
-            // Theme toggles
-            document.getElementById('themeToggle').addEventListener('click', toggleTheme);
-            document.getElementById('mobileThemeToggle').addEventListener('click', toggleTheme);
+function loadHotNew() {
+    if (!window.MangaAPI) return;
 
-            // Language switches
-            const langSwitch = document.getElementById('langSwitch');
-            const mobileLangSwitch = document.getElementById('mobileLangSwitch');
-            
-            if (langSwitch) {
-                langSwitch.addEventListener('change', (e) => updateLanguage(e.target.value));
-            }
-            if (mobileLangSwitch) {
-                mobileLangSwitch.addEventListener('change', (e) => updateLanguage(e.target.value));
-            }
+    const allManga = window.MangaAPI.getAllManga();
+    const hotNew = allManga
+        .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0))
+        .slice(0, 8);
 
-            // Profile buttons
-            document.getElementById('profileBtn').addEventListener('click', toggleMenu);
-            document.getElementById('mobileProfileBtn').addEventListener('click', (e) => {
-                e.preventDefault();
-                toggleMenu();
-            });
+    const grid = document.getElementById('hotNewGrid');
+    if (grid) {
+        grid.innerHTML = hotNew.map(manga => renderMangaCard(manga, 'new')).join('');
+    }
+}
 
-            // Menu overlay
-            document.getElementById('menuOverlay').addEventListener('click', closeMenu);
+function loadPopular() {
+    if (!window.MangaAPI) return;
 
-            // Initialize
-            updateTheme();
-            updateAuthState();
-            
-            // Load saved language
-            const savedLang = localStorage.getItem('language') || 'ru';
-            updateLanguage(savedLang);
+    const allManga = window.MangaAPI.getAllManga();
+    const popular = allManga
+        .sort((a, b) => (b.rating || 0) - (a.rating || 0))
+        .slice(0, 8);
 
-            // Wait for data to be ready
-            if (window.MangaAPI) {
-                initializeHomepage();
-            } else {
-                // Listen for data ready event
-                window.addEventListener('mangaDataReady', initializeHomepage);
-            }
+    const grid = document.getElementById('popularGrid');
+    if (grid) {
+        grid.innerHTML = popular.map(manga => renderMangaCard(manga, 'hot')).join('');
+    }
+}
 
-            // Pause carousel on hover
-            const heroSection = document.querySelector('.hero-section');
-            if (heroSection) {
-                heroSection.addEventListener('mouseenter', stopCarousel);
-                heroSection.addEventListener('mouseleave', startCarousel);
-            }
-        });
+function loadNews() {
+    const grid = document.getElementById('newsGrid');
+    if (!grid) return;
+    
+    grid.innerHTML = newsData.map(news => `
+        <div class="news-card">
+            <h3 class="news-title">${news.title}</h3>
+            <p class="news-excerpt">${news.excerpt}</p>
+            <div class="news-meta">
+                <span class="news-tag">${news.tag}</span>
+                <span>${window.CommonUtils.formatTime(news.date)}</span>
+            </div>
+        </div>
+    `).join('');
+}
 
-        // Keyboard shortcuts
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                closeMenu();
-            }
-        });
+function loadRecentUpdates() {
+    if (!window.MangaAPI) return;
 
-        // Cleanup on page unload
-        window.addEventListener('beforeunload', function() {
-            stopCarousel();
-        });
-    </script>
+    const allManga = window.MangaAPI.getAllManga();
+    const recentUpdates = allManga
+        .sort((a, b) => new Date(b.updatedAt || b.createdAt || 0) - new Date(a.updatedAt || a.createdAt || 0))
+        .slice(0, 10);
+
+    const list = document.getElementById('updatesList');
+    if (!list) return;
+    
+    list.innerHTML = recentUpdates.map(manga => `
+        <div class="update-item" onclick="window.location.href='player.html?id=${manga.id}'">
+            <img src="${manga.image || 'https://via.placeholder.com/60x80/FF8A50/FFFFFF?text=' + encodeURIComponent(manga.title.charAt(0))}" 
+                 alt="${manga.title}" 
+                 class="update-image"
+                 onerror="this.src='https://via.placeholder.com/60x80/FF8A50/FFFFFF?text=' + encodeURIComponent('${manga.title.charAt(0)}')">
+            <div class="update-content">
+                <h4 class="update-title">${manga.title}</h4>
+                <p class="update-chapter">Глава ${manga.availableEpisodes || 1} • ${manga.type}</p>
+                <p class="update-time">${window.CommonUtils.formatTime(manga.updatedAt || manga.createdAt || new Date())}</p>
+            </div>
+        </div>
+    `).join('');
+}
+
+/**
+ * ========================================
+ * ДЕЙСТВИЯ ПОЛЬЗОВАТЕЛЯ
+ * ========================================
+ */
+
+function addToFavorites(mangaId) {
+    if (!window.MangaAPI) return;
+    
+    const manga = window.MangaAPI.getMangaById(mangaId);
+    if (!manga) return;
+
+    const mangaForStorage = {
+        id: Date.now(),
+        mangaId: manga.id,
+        title: manga.title,
+        image: manga.image,
+        totalEpisodes: manga.totalEpisodes,
+        availableEpisodes: manga.availableEpisodes,
+        status: manga.status,
+        rating: manga.rating,
+        addedAt: new Date().toISOString()
+    };
+
+    const currentList = JSON.parse(localStorage.getItem('favorites') || '[]');
+    
+    // Удаляем если уже есть
+    const filtered = currentList.filter(item => item.mangaId !== manga.id);
+    
+    // Добавляем новую запись
+    filtered.push(mangaForStorage);
+    
+    localStorage.setItem('favorites', JSON.stringify(filtered));
+    
+    window.CommonUtils.showNotification('Добавлено в избранное', 'success');
+}
+
+/**
+ * ========================================
+ * ИНИЦИАЛИЗАЦИЯ ГЛАВНОЙ СТРАНИЦЫ
+ * ========================================
+ */
+
+function initializeHomepage() {
+    createCarousel();
+    loadHotNew();
+    loadPopular();
+    loadNews();
+    loadRecentUpdates();
+}
+
+/**
+ * ========================================
+ * ОБРАБОТЧИКИ СОБЫТИЙ
+ * ========================================
+ */
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Ждем загрузки данных
+    if (window.MangaAPI) {
+        initializeHomepage();
+    } else {
+        // Слушаем событие готовности данных
+        window.addEventListener('mangaDataReady', initializeHomepage);
+    }
+
+    // Паузим карусель при наведении
+    const heroSection = document.querySelector('.hero-section');
+    if (heroSection) {
+        heroSection.addEventListener('mouseenter', stopCarousel);
+        heroSection.addEventListener('mouseleave', startCarousel);
+    }
+});
+
+// Очистка при выгрузке страницы
+window.addEventListener('beforeunload', function() {
+    stopCarousel();
+});
+
+// Экспорт функций для глобального использования
+window.goToSlide = goToSlide;
+window.addToFavorites = addToFavorites;
