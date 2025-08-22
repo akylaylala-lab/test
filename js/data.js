@@ -527,4 +527,13 @@
         if (typeof window !== 'undefined') {
             window.dispatchEvent(new CustomEvent('mangaDataReady', {
                 detail: { api: window.MangaAPI }
-            }
+            }));
+            console.log('📡 Отправлено событие mangaDataReady');
+        }
+    }, 100);
+
+    console.log('🦊 Light Fox Manga Data System загружена');
+    console.log(`📚 Загружено ${mangaSystem.data.length} тайтлов`);
+    console.log('🔧 API доступен через window.MangaAPI');
+
+})();
