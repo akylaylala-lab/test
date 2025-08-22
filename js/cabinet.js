@@ -1,4 +1,22 @@
-
+document.addEventListener('DOMContentLoaded', function() {
+    // Ждем загрузки common.js
+    if (window.CommonUtils) {
+        const { 
+            updateTheme, 
+            toggleTheme, 
+            updateLanguage, 
+            updateAuthState, 
+            login, 
+            logout, 
+            toggleMenu, 
+            closeMenu, 
+            openRandomManga, 
+            showNotification 
+        } = window.CommonUtils;
+        
+        // Остальной код...
+    }
+});
         // State
         let isDark = localStorage.getItem('theme') === 'dark';
         let isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
