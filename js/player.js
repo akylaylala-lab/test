@@ -26,213 +26,7 @@
             updateIcons('.moon-icon', '.sun-icon');
             updateIcons('.mobile-moon-icon', '.mobile-sun-icon');
             
-            localStorage.setItem('donationHistory', JSON.stringify(donationHistory));
-        }
-
-        // User actions
-        function addToFavorites() {
-            addToUserList('favorites', 'Избранное');
-        }
-
-        function addToWatching() {
-            addToUserList('watching', 'Смотрю');
-        }
-
-        function addToWantToWatch() {
-            addToUserList('wantToWatch', 'Хочу посмотреть');
-        }
-
-        function addToCompleted() {
-            addToUserList('completed', 'Досмотрел');
-        }
-
-        function addToUserList(listName, listTitle) {
-            if (!currentManga) return;
-            
-            const mangaForStorage = {
-                id: Date.now(),
-                mangaId: currentManga.id,
-                title: currentManga.title,
-                image: currentManga.image,
-                currentEpisode: currentEpisode,
-                totalEpisodes: currentManga.totalEpisodes,
-                availableEpisodes: currentManga.availableEpisodes,
-                status: currentManga.status,
-                rating: currentManga.rating,
-                addedAt: new Date().toISOString()
-            };
-
-            const currentList = JSON.parse(localStorage.getItem(listName) || '[]');
-            
-            // Remove if already exists
-            const filtered = currentList.filter(item => item.mangaId !== currentManga.id);
-            
-            // Add new entry
-            filtered.push(mangaForStorage);
-            
-            localStorage.setItem(listName, JSON.stringify(filtered));
-            
-            showNotification(`Добавлено в "${listTitle}"`, 'success');
-        }
-
-        function markCurrentEpisode() {
-            if (!currentManga) return;
-            
-            const watchingProgress = JSON.parse(localStorage.getItem('watchingProgress') || '{}');
-            watchingProgress[currentManga.id] = {
-                mangaTitle: currentManga.title,
-                currentEpisode: currentEpisode,
-                totalEpisodes: currentManga.totalEpisodes,
-                lastWatched: new Date().toISOString()
-            };
-            localStorage.setItem('watchingProgress', JSON.stringify(watchingProgress));
-            
-            showNotification(`Отмечено: остановился на серии ${currentEpisode}`, 'success');
-        }
-
-        function openInCabinet() {
-            // Add to watching list first
-            addToWatching();
-            
-            // Redirect to cabinet
-            setTimeout(() => {
-                window.location.href = 'cabinet.html';
-            }, 1000);
-        }
-
-        // Utility functions
-        function showNotification(message, type = 'success') {
-            const notification = document.getElementById('notification');
-            if (notification) {
-                notification.textContent = message;
-                notification.className = `notification show ${type}`;
-                
-                setTimeout(() => {
-                    notification.classList.remove('show');
-                }, 3000);
-            }
-        }
-
-        function showError(message) {
-            console.error('❌ Ошибка плеера:', message);
-            
-            const loadingState = document.getElementById('loadingState');
-            const errorState = document.getElementById('errorState');
-            
-            if (loadingState) loadingState.style.display = 'none';
-            if (errorState) {
-                errorState.style.display = 'flex';
-                const errorText = errorState.querySelector('p');
-                if (errorText) errorText.textContent = message;
-            }
-        }
-
-        // === ИНИЦИАЛИЗАЦИЯ И ОБРАБОТЧИКИ СОБЫТИЙ ===
-        
-        // Event listeners
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('🎬 DOM загружен, инициализация плеера...');
-            
-            // Theme toggles
-            const themeToggle = document.getElementById('themeToggle');
-            const mobileThemeToggle = document.getElementById('mobileThemeToggle');
-            const mobileSideThemeToggle = document.getElementById('mobileSideThemeToggle');
-            
-            if (themeToggle) themeToggle.addEventListener('click', toggleTheme);
-            if (mobileThemeToggle) mobileThemeToggle.addEventListener('click', toggleTheme);
-            if (mobileSideThemeToggle) mobileSideThemeToggle.addEventListener('click', toggleTheme);
-
-            // Language switches
-            const langSwitch = document.getElementById('langSwitch');
-            const mobileLangSwitch = document.getElementById('mobileLangSwitch');
-            
-            if (langSwitch) {
-                langSwitch.addEventListener('change', (e) => updateLanguage(e.target.value));
-            }
-            if (mobileLangSwitch) {
-                mobileLangSwitch.addEventListener('change', (e) => updateLanguage(e.target.value));
-            }
-
-            // Profile buttons
-            const profileBtn = document.getElementById('profileBtn');
-            const mobileProfileBtn = document.getElementById('mobileProfileBtn');
-            
-            if (profileBtn) profileBtn.addEventListener('click', toggleMenu);
-            if (mobileProfileBtn) {
-                mobileProfileBtn.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    toggleMenu();
-                });
-            }
-
-            // Menu overlay
-            const menuOverlay = document.getElementById('menuOverlay');
-            if (menuOverlay) menuOverlay.addEventListener('click', closeMenu);
-            
-            // Initialize
-            updateTheme();
-            updateAuthState();
-            
-            // Load saved language
-            const savedLang = localStorage.getItem('language') || 'ru';
-            updateLanguage(savedLang);
-
-            // Запускаем инициализацию плеера
-            initializePlayer();
-        });
-
-        // Listen for data ready event
-        window.addEventListener('mangaDataReady', function(e) {
-            console.log('📡 Получено событие mangaDataReady');
-            if (!currentManga) {
-                initializePlayer();
-            }
-        });
-
-        // Keyboard shortcuts
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                closeMenu();
-            }
-            
-            if (!currentManga) return;
-
-            switch(e.key) {
-                case 'ArrowLeft':
-                    if (currentEpisode > 1) {
-                        selectEpisode(currentEpisode - 1);
-                    }
-                    break;
-                case 'ArrowRight':
-                    if (currentEpisode < (currentManga.totalEpisodes || 0)) {
-                        selectEpisode(currentEpisode + 1);
-                    }
-                    break;
-                case 'Home':
-                    selectEpisode(1);
-                    break;
-                case 'End':
-                    selectEpisode(currentManga.availableEpisodes || 1);
-                    break;
-            }
-        });
-
-        // Экспорт функций для onclick
-        window.selectEpisode = selectEpisode;
-        window.setDonationAmount = setDonationAmount;
-        window.makeDonation = makeDonation;
-        window.addToFavorites = addToFavorites;
-        window.addToWatching = addToWatching;
-        window.addToWantToWatch = addToWantToWatch;
-        window.addToCompleted = addToCompleted;
-        window.markCurrentEpisode = markCurrentEpisode;
-        window.openInCabinet = openInCabinet;
-        window.openRandomManga = openRandomManga;
-        window.login = login;
-        window.logout = logout;
-        window.closeMenu = closeMenu;
-
-        console.log('🎉 Исправленный плеер готов к работе!');.setItem('theme', isDark ? 'dark' : 'light');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
         }
 
         function toggleTheme() {
@@ -735,4 +529,210 @@
                 episode: currentEpisode,
                 timestamp: new Date().toISOString()
             });
-            localStorage
+            localStorage.setItem('donationHistory', JSON.stringify(donationHistory));
+        }
+
+        // User actions
+        function addToFavorites() {
+            addToUserList('favorites', 'Избранное');
+        }
+
+        function addToWatching() {
+            addToUserList('watching', 'Смотрю');
+        }
+
+        function addToWantToWatch() {
+            addToUserList('wantToWatch', 'Хочу посмотреть');
+        }
+
+        function addToCompleted() {
+            addToUserList('completed', 'Досмотрел');
+        }
+
+        function addToUserList(listName, listTitle) {
+            if (!currentManga) return;
+            
+            const mangaForStorage = {
+                id: Date.now(),
+                mangaId: currentManga.id,
+                title: currentManga.title,
+                image: currentManga.image,
+                currentEpisode: currentEpisode,
+                totalEpisodes: currentManga.totalEpisodes,
+                availableEpisodes: currentManga.availableEpisodes,
+                status: currentManga.status,
+                rating: currentManga.rating,
+                addedAt: new Date().toISOString()
+            };
+
+            const currentList = JSON.parse(localStorage.getItem(listName) || '[]');
+            
+            // Remove if already exists
+            const filtered = currentList.filter(item => item.mangaId !== currentManga.id);
+            
+            // Add new entry
+            filtered.push(mangaForStorage);
+            
+            localStorage.setItem(listName, JSON.stringify(filtered));
+            
+            showNotification(`Добавлено в "${listTitle}"`, 'success');
+        }
+
+        function markCurrentEpisode() {
+            if (!currentManga) return;
+            
+            const watchingProgress = JSON.parse(localStorage.getItem('watchingProgress') || '{}');
+            watchingProgress[currentManga.id] = {
+                mangaTitle: currentManga.title,
+                currentEpisode: currentEpisode,
+                totalEpisodes: currentManga.totalEpisodes,
+                lastWatched: new Date().toISOString()
+            };
+            localStorage.setItem('watchingProgress', JSON.stringify(watchingProgress));
+            
+            showNotification(`Отмечено: остановился на серии ${currentEpisode}`, 'success');
+        }
+
+        function openInCabinet() {
+            // Add to watching list first
+            addToWatching();
+            
+            // Redirect to cabinet
+            setTimeout(() => {
+                window.location.href = 'cabinet.html';
+            }, 1000);
+        }
+
+        // Utility functions
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            if (notification) {
+                notification.textContent = message;
+                notification.className = `notification show ${type}`;
+                
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                }, 3000);
+            }
+        }
+
+        function showError(message) {
+            console.error('❌ Ошибка плеера:', message);
+            
+            const loadingState = document.getElementById('loadingState');
+            const errorState = document.getElementById('errorState');
+            
+            if (loadingState) loadingState.style.display = 'none';
+            if (errorState) {
+                errorState.style.display = 'flex';
+                const errorText = errorState.querySelector('p');
+                if (errorText) errorText.textContent = message;
+            }
+        }
+
+        // === ИНИЦИАЛИЗАЦИЯ И ОБРАБОТЧИКИ СОБЫТИЙ ===
+        
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🎬 DOM загружен, инициализация плеера...');
+            
+            // Theme toggles
+            const themeToggle = document.getElementById('themeToggle');
+            const mobileThemeToggle = document.getElementById('mobileThemeToggle');
+            const mobileSideThemeToggle = document.getElementById('mobileSideThemeToggle');
+            
+            if (themeToggle) themeToggle.addEventListener('click', toggleTheme);
+            if (mobileThemeToggle) mobileThemeToggle.addEventListener('click', toggleTheme);
+            if (mobileSideThemeToggle) mobileSideThemeToggle.addEventListener('click', toggleTheme);
+
+            // Language switches
+            const langSwitch = document.getElementById('langSwitch');
+            const mobileLangSwitch = document.getElementById('mobileLangSwitch');
+            
+            if (langSwitch) {
+                langSwitch.addEventListener('change', (e) => updateLanguage(e.target.value));
+            }
+            if (mobileLangSwitch) {
+                mobileLangSwitch.addEventListener('change', (e) => updateLanguage(e.target.value));
+            }
+
+            // Profile buttons
+            const profileBtn = document.getElementById('profileBtn');
+            const mobileProfileBtn = document.getElementById('mobileProfileBtn');
+            
+            if (profileBtn) profileBtn.addEventListener('click', toggleMenu);
+            if (mobileProfileBtn) {
+                mobileProfileBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    toggleMenu();
+                });
+            }
+
+            // Menu overlay
+            const menuOverlay = document.getElementById('menuOverlay');
+            if (menuOverlay) menuOverlay.addEventListener('click', closeMenu);
+            
+            // Initialize
+            updateTheme();
+            updateAuthState();
+            
+            // Load saved language
+            const savedLang = localStorage.getItem('language') || 'ru';
+            updateLanguage(savedLang);
+
+            // Запускаем инициализацию плеера
+            initializePlayer();
+        });
+
+        // Listen for data ready event
+        window.addEventListener('mangaDataReady', function(e) {
+            console.log('📡 Получено событие mangaDataReady');
+            if (!currentManga) {
+                initializePlayer();
+            }
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeMenu();
+            }
+            
+            if (!currentManga) return;
+
+            switch(e.key) {
+                case 'ArrowLeft':
+                    if (currentEpisode > 1) {
+                        selectEpisode(currentEpisode - 1);
+                    }
+                    break;
+                case 'ArrowRight':
+                    if (currentEpisode < (currentManga.totalEpisodes || 0)) {
+                        selectEpisode(currentEpisode + 1);
+                    }
+                    break;
+                case 'Home':
+                    selectEpisode(1);
+                    break;
+                case 'End':
+                    selectEpisode(currentManga.availableEpisodes || 1);
+                    break;
+            }
+        });
+
+        // Экспорт функций для onclick
+        window.selectEpisode = selectEpisode;
+        window.setDonationAmount = setDonationAmount;
+        window.makeDonation = makeDonation;
+        window.addToFavorites = addToFavorites;
+        window.addToWatching = addToWatching;
+        window.addToWantToWatch = addToWantToWatch;
+        window.addToCompleted = addToCompleted;
+        window.markCurrentEpisode = markCurrentEpisode;
+        window.openInCabinet = openInCabinet;
+        window.openRandomManga = openRandomManga;
+        window.login = login;
+        window.logout = logout;
+        window.closeMenu = closeMenu;
+
+        console.log('🎉 Исправленный плеер готов к работе!');
