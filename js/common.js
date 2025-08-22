@@ -1,4 +1,3 @@
-
 /**
  * Light Fox Manga - Общая функциональность
  * Содержит функции, используемые на всех страницах
@@ -108,4 +107,185 @@ function login() {
 
 function logout() {
     if (confirm('Вы уверены, что хотите выйти?')) {
-        isLoggedIn
+        isLoggedIn = false;
+        currentUser = null;
+        
+        localStorage.removeItem('isLoggedIn');
+        localStorage.removeItem('currentUser');
+        
+        updateAuthState();
+        closeMenu();
+        
+        showNotification('Вы успешно вышли из системы', 'success');
+    }
+}
+
+/**
+ * ========================================
+ * УПРАВЛЕНИЕ МЕНЮ
+ * ========================================
+ */
+
+function toggleMenu() {
+    const sideMenu = document.getElementById('sideMenu');
+    const menuOverlay = document.getElementById('menuOverlay');
+    
+    if (sideMenu && menuOverlay) {
+        sideMenu.classList.toggle('open');
+        menuOverlay.classList.toggle('show');
+    }
+}
+
+function closeMenu() {
+    const sideMenu = document.getElementById('sideMenu');
+    const menuOverlay = document.getElementById('menuOverlay');
+    
+    if (sideMenu && menuOverlay) {
+        sideMenu.classList.remove('open');
+        menuOverlay.classList.remove('show');
+    }
+}
+
+/**
+ * ========================================
+ * СЛУЧАЙНАЯ МАНГА
+ * ========================================
+ */
+
+function openRandomManga() {
+    if (window.MangaAPI) {
+        const allManga = window.MangaAPI.getAllManga();
+        if (allManga.length > 0) {
+            const randomManga = allManga[Math.floor(Math.random() * allManga.length)];
+            window.location.href = `player.html?id=${randomManga.id}`;
+        } else {
+            showNotification('Каталог пуст. Добавьте тайтлы через админку!', 'error');
+        }
+    } else {
+        showNotification('Система данных не загружена', 'error');
+    }
+}
+
+/**
+ * ========================================
+ * УТИЛИТЫ
+ * ========================================
+ */
+
+function showNotification(message, type = 'success') {
+    const notification = document.getElementById('notification');
+    if (!notification) return;
+    
+    notification.textContent = message;
+    notification.className = `notification show ${type}`;
+    
+    setTimeout(() => {
+        notification.classList.remove('show');
+    }, 3000);
+}
+
+function formatTime(date) {
+    const now = new Date();
+    const time = new Date(date);
+    const diff = Math.floor((now - time) / 1000);
+
+    if (diff < 60) return 'только что';
+    if (diff < 3600) return `${Math.floor(diff / 60)} мин назад`;
+    if (diff < 86400) return `${Math.floor(diff / 3600)} ч назад`;
+    if (diff < 604800) return `${Math.floor(diff / 86400)} дн назад`;
+    
+    return time.toLocaleDateString('ru-RU');
+}
+
+/**
+ * ========================================
+ * ИНИЦИАЛИЗАЦИЯ ОБЩИХ КОМПОНЕНТОВ
+ * ========================================
+ */
+
+function initializeCommonComponents() {
+    // Theme toggles
+    const themeToggle = document.getElementById('themeToggle');
+    const mobileThemeToggle = document.getElementById('mobileThemeToggle');
+    const mobileSideThemeToggle = document.getElementById('mobileSideThemeToggle');
+    
+    if (themeToggle) themeToggle.addEventListener('click', toggleTheme);
+    if (mobileThemeToggle) mobileThemeToggle.addEventListener('click', toggleTheme);
+    if (mobileSideThemeToggle) mobileSideThemeToggle.addEventListener('click', toggleTheme);
+
+    // Language switches
+    const langSwitch = document.getElementById('langSwitch');
+    const mobileLangSwitch = document.getElementById('mobileLangSwitch');
+    
+    if (langSwitch) {
+        langSwitch.addEventListener('change', (e) => updateLanguage(e.target.value));
+    }
+    if (mobileLangSwitch) {
+        mobileLangSwitch.addEventListener('change', (e) => updateLanguage(e.target.value));
+    }
+
+    // Profile buttons
+    const profileBtn = document.getElementById('profileBtn');
+    const mobileProfileBtn = document.getElementById('mobileProfileBtn');
+    
+    if (profileBtn) profileBtn.addEventListener('click', toggleMenu);
+    if (mobileProfileBtn) {
+        mobileProfileBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            toggleMenu();
+        });
+    }
+
+    // Menu overlay
+    const menuOverlay = document.getElementById('menuOverlay');
+    if (menuOverlay) menuOverlay.addEventListener('click', closeMenu);
+
+    // Initialize states
+    updateTheme();
+    updateAuthState();
+    
+    // Load saved language
+    const savedLang = localStorage.getItem('language') || 'ru';
+    updateLanguage(savedLang);
+}
+
+/**
+ * ========================================
+ * КЛАВИАТУРНЫЕ СОКРАЩЕНИЯ
+ * ========================================
+ */
+
+function initializeKeyboardShortcuts() {
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeMenu();
+        }
+    });
+}
+
+/**
+ * ========================================
+ * АВТОИНИЦИАЛИЗАЦИЯ
+ * ========================================
+ */
+
+// Инициализация при загрузке DOM
+document.addEventListener('DOMContentLoaded', function() {
+    initializeCommonComponents();
+    initializeKeyboardShortcuts();
+});
+
+// Экспорт функций для использования в других скриптах
+window.CommonUtils = {
+    updateTheme,
+    toggleTheme,
+    updateLanguage,
+    updateAuthState,
+    login,
+    logout,
+    toggleMenu,
+    closeMenu,
+    openRandomManga,
+    showNotification,
+    formatTime
+};
