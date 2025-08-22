@@ -197,6 +197,134 @@ function formatTime(date) {
     return time.toLocaleDateString('ru-RU');
 }
 
+// ========================================
+// ДОПОЛНИТЕЛЬНЫЕ УТИЛИТЫ
+// ========================================
+
+/**
+ * Безопасное получение элемента по ID
+ */
+function safeGetElement(id) {
+    const element = document.getElementById(id);
+    if (!element) {
+        console.warn(`Элемент с ID '${id}' не найден`);
+    }
+    return element;
+}
+
+/**
+ * Проверка доступности API
+ */
+function isAPIReady() {
+    return window.MangaAPI && typeof window.MangaAPI.getAllManga === 'function';
+}
+
+/**
+ * Генерация placeholder изображения
+ */
+function generatePlaceholder(text, width = 300, height = 400, bgColor = 'FF6B35', textColor = 'FFFFFF') {
+    return `https://via.placeholder.com/${width}x${height}/${bgColor}/${textColor}?text=${encodeURIComponent(text)}`;
+}
+
+/**
+ * Валидация URL изображения
+ */
+function validateImageUrl(url, fallbackText) {
+    if (!url || url.trim() === '') {
+        return generatePlaceholder(fallbackText);
+    }
+    return url;
+}
+
+/**
+ * Безопасное обновление текстового содержимого
+ */
+function safeUpdateText(elementId, text, fallback = 'N/A') {
+    const element = safeGetElement(elementId);
+    if (element) {
+        element.textContent = text || fallback;
+    }
+}
+
+/**
+ * Безопасное обновление HTML содержимого
+ */
+function safeUpdateHTML(elementId, html, fallback = '') {
+    const element = safeGetElement(elementId);
+    if (element) {
+        element.innerHTML = html || fallback;
+    }
+}
+
+/**
+ * Получение состояния аутентификации
+ */
+function getAuthState() {
+    return {
+        isLoggedIn,
+        currentUser: currentUser ? { ...currentUser } : null
+    };
+}
+
+/**
+ * Получение состояния темы
+ */
+function getThemeState() {
+    return {
+        isDark,
+        theme: isDark ? 'dark' : 'light'
+    };
+}
+
+/**
+ * Навигация между страницами
+ */
+function navigateTo(page, params = {}) {
+    let url = page;
+    const searchParams = new URLSearchParams(params);
+    if (searchParams.toString()) {
+        url += '?' + searchParams.toString();
+    }
+    window.location.href = url;
+}
+
+/**
+ * Копирование текста в буфер обмена
+ */
+async function copyToClipboard(text) {
+    try {
+        await navigator.clipboard.writeText(text);
+        showNotification('Скопировано в буфер обмена', 'success');
+        return true;
+    } catch (err) {
+        console.error('Ошибка копирования:', err);
+        showNotification('Ошибка копирования', 'error');
+        return false;
+    }
+}
+
+/**
+ * Проверка мобильного устройства
+ */
+function isMobile() {
+    return window.innerWidth <= 768;
+}
+
+/**
+ * Дебаунс функция
+ */
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
 /**
  * ========================================
  * ИНИЦИАЛИЗАЦИЯ ОБЩИХ КОМПОНЕНТОВ
@@ -277,6 +405,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Экспорт функций для использования в других скриптах
 window.CommonUtils = {
+    // Основные функции
     updateTheme,
     toggleTheme,
     updateLanguage,
@@ -287,5 +416,19 @@ window.CommonUtils = {
     closeMenu,
     openRandomManga,
     showNotification,
-    formatTime
+    formatTime,
+    
+    // Дополнительные утилиты
+    safeGetElement,
+    isAPIReady,
+    generatePlaceholder,
+    validateImageUrl,
+    safeUpdateText,
+    safeUpdateHTML,
+    getAuthState,
+    getThemeState,
+    navigateTo,
+    copyToClipboard,
+    isMobile,
+    debounce
 };
